@@ -1,0 +1,212 @@
+[
+    {
+        "id": "38654e95a1c1faca",
+        "type": "tab",
+        "label": "Fluxo 1",
+        "disabled": false,
+        "info": "",
+        "env": []
+    },
+    {
+        "id": "65464e38c5772c7c",
+        "type": "mqtt in",
+        "z": "38654e95a1c1faca",
+        "name": "",
+        "topic": "iot/energia/consumo",
+        "qos": "0",
+        "datatype": "auto-detect",
+        "broker": "33e696891ca64307",
+        "nl": false,
+        "rap": true,
+        "rh": 0,
+        "inputs": 0,
+        "x": 210,
+        "y": 180,
+        "wires": [
+            [
+                "4d1ef3e8710235a2",
+                "3dfdf59b0177c058",
+                "35d77d6bc021b73b"
+            ]
+        ]
+    },
+    {
+        "id": "4d1ef3e8710235a2",
+        "type": "mqtt out",
+        "z": "38654e95a1c1faca",
+        "name": "",
+        "topic": "iot/energia/alerta",
+        "qos": "",
+        "retain": "",
+        "respTopic": "",
+        "contentType": "",
+        "userProps": "",
+        "correl": "",
+        "expiry": "",
+        "broker": "33e696891ca64307",
+        "x": 450,
+        "y": 240,
+        "wires": []
+    },
+    {
+        "id": "fc5d718aa5b6fd3a",
+        "type": "influxdb out",
+        "z": "38654e95a1c1faca",
+        "influxdb": "3fbcccb08114f62e",
+        "name": "",
+        "measurement": "corrente_esp32",
+        "precision": "",
+        "retentionPolicy": "",
+        "database": "database",
+        "precisionV18FluxV20": "ms",
+        "retentionPolicyV18Flux": "",
+        "org": "c9960616c1afab98",
+        "bucket": "esp32_corrente",
+        "x": 840,
+        "y": 180,
+        "wires": []
+    },
+    {
+        "id": "3dfdf59b0177c058",
+        "type": "function",
+        "z": "38654e95a1c1faca",
+        "name": "function 1",
+        "func": "let corrente = parseFloat(msg.payload);\n\nmsg.payload = {\n    _measurement: \"corrente_esp32\",\n    corrente: corrente,\n    value: corrente\n};\n\nmsg.corrente = corrente; \n\nreturn msg;\n\n",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 440,
+        "y": 180,
+        "wires": [
+            [
+                "fc5d718aa5b6fd3a",
+                "9e9051abed5e0b6c"
+            ]
+        ]
+    },
+    {
+        "id": "9e9051abed5e0b6c",
+        "type": "function",
+        "z": "38654e95a1c1faca",
+        "name": "Formatar Mensagem ",
+        "func": "let corrente = msg.corrente;\n\nif (typeof corrente !== 'number' || isNaN(corrente)) {\n    node.error(\"Corrente inválida ou não definida!\", msg);\n    return null;\n}\n\nif (corrente <= 28) {\n    return null;  \n}\n\nlet mensagem = `Alerta: Corrente lida = ${corrente.toFixed(2)} A`;\n\nconst phone = \"5511988912251\";  \nconst apikey = \"3387496\";       \n\nmsg.url = `https://api.callmebot.com/whatsapp.php?phone=${phone}&text=${encodeURIComponent(mensagem)}&apikey=${apikey}`;\n\nmsg.payload = null; \n\nreturn msg;\n\n\n\n",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 720,
+        "y": 240,
+        "wires": [
+            [
+                "aaaec8631d146285"
+            ]
+        ]
+    },
+    {
+        "id": "35d77d6bc021b73b",
+        "type": "debug",
+        "z": "38654e95a1c1faca",
+        "name": "debug 5",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "false",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 440,
+        "y": 120,
+        "wires": []
+    },
+    {
+        "id": "aaaec8631d146285",
+        "type": "http request",
+        "z": "38654e95a1c1faca",
+        "name": "",
+        "method": "GET",
+        "ret": "txt",
+        "paytoqs": "ignore",
+        "url": "",
+        "tls": "",
+        "persist": false,
+        "proxy": "",
+        "insecureHTTPParser": false,
+        "authType": "",
+        "senderr": false,
+        "headers": [],
+        "x": 960,
+        "y": 240,
+        "wires": [
+            [
+                "ddb82bada221de2c"
+            ]
+        ]
+    },
+    {
+        "id": "ddb82bada221de2c",
+        "type": "debug",
+        "z": "38654e95a1c1faca",
+        "name": "debug 3",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "false",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 1000,
+        "y": 320,
+        "wires": []
+    },
+    {
+        "id": "33e696891ca64307",
+        "type": "mqtt-broker",
+        "name": "",
+        "broker": "broker.emqx.io",
+        "port": 1883,
+        "clientid": "",
+        "autoConnect": true,
+        "usetls": false,
+        "protocolVersion": 4,
+        "keepalive": 60,
+        "cleansession": true,
+        "autoUnsubscribe": true,
+        "birthTopic": "",
+        "birthQos": "0",
+        "birthRetain": "false",
+        "birthPayload": "",
+        "birthMsg": {},
+        "closeTopic": "",
+        "closeQos": "0",
+        "closeRetain": "false",
+        "closePayload": "",
+        "closeMsg": {},
+        "willTopic": "",
+        "willQos": "0",
+        "willRetain": "false",
+        "willPayload": "",
+        "willMsg": {},
+        "userProps": "",
+        "sessionExpiry": ""
+    },
+    {
+        "id": "3fbcccb08114f62e",
+        "type": "influxdb",
+        "hostname": "127.0.0.1",
+        "port": 8086,
+        "protocol": "http",
+        "database": "database",
+        "name": "InfluxDB Account",
+        "usetls": false,
+        "tls": "",
+        "influxdbVersion": "2.0",
+        "url": "https://us-east-1-1.aws.cloud2.influxdata.com",
+        "timeout": 10,
+        "rejectUnauthorized": true
+    }
+]
